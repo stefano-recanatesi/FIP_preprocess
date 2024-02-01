@@ -1,0 +1,8 @@
+environment_version: 1
+credentials:
+- type: aws
+  id: dYkkk5ioQ0ppSk
+  description: AIND data S3
+  access_key_id: AWS_ACCESS_KEY_ID
+  secret_access_key: AWS_SECRET_ACCESS_KEY
+  region: AWS_DEFAULT_REGION

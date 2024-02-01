@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -e
+
+# check if code-server is installed, and then install extensions into specified directory
+if code-server --disable-telemetry --version; then
+if [ ! -d "/.vscode/extensions" ]
+    then
+       echo "Directory /.vscode/extensions DOES NOT exists."
+       mkdir -p /.vscode/extensions/
+       fi
+       
+       code-server --disable-telemetry --extensions-dir=/.vscode/extensions --install-extension ms-python.python
+       code-server --disable-telemetry --extensions-dir=/.vscode/extensions --install-extension njpwerner.autodocstring
+       else
+          echo "code-server not found"
+       fi
