@@ -208,6 +208,6 @@ for i_session in np.arange(len(folders_sessions))[:]:
     df_sessions_new = pd.concat([df_sessions_new, df_session], axis=0)
         
 # Save dataframe across processed sessions
-# df_sessions_new.to_pickle('/results/df_sessions.pk')
+df_sessions_new.to_pickle('/results/df_sessions.pk')
 
 #%%
