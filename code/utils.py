@@ -16,6 +16,8 @@ from matplotlib.patches import ConnectionPatch
 
 #%%
 def preprocessing(i_session, datafolder='/data', resultsfolder='/results'):
+    print("starting preprocessing")
+    
     folders_sessions = sorted(glob.glob(datafolder+os.sep+'*'))
     folder_session = folders_sessions[i_session]
     AnalDir = folder_session+'/FIP'
@@ -112,13 +114,6 @@ def preprocessing(i_session, datafolder='/data', resultsfolder='/results'):
         Data_Fiber2R = data3[:,2]
         PMts = data2[:,0]
 
-    # Data_Fiber1iso = data1[:,8]
-    # Data_Fiber1G = data2[:,8]
-    # Data_Fiber1R = data3[:,10]
-    
-    # Data_Fiber2iso = data1[:,9]
-    # Data_Fiber2G = data2[:,9]
-    # Data_Fiber2R = data3[:,11]
 
     #%% From here to be multiplexed
 
@@ -132,27 +127,7 @@ def preprocessing(i_session, datafolder='/data', resultsfolder='/results'):
 
     time_seconds = np.arange(len(G1_raw)) /sampling_rate 
 
-    # #%% Raw signals
-    # plt.figure()
-    # plt.subplot(2,1,1)
-    # plt.plot(time_seconds, G1_raw, 'g', label='G1')
-    # plt.plot(time_seconds, R1_raw, 'r', label='R1')
-    # plt.plot(time_seconds, Ctrl1_raw, 'b', label='iso')
-    # plt.xlabel('Time (seconds)')
-    # plt.ylabel('CMOS Signal')
-    # plt.title('Raw signals:ROI1')
-    # plt.legend()
-
-    # plt.subplot(2,1,2)
-    # plt.plot(time_seconds, G2_raw, 'g', label='G2')
-    # plt.plot(time_seconds, R2_raw, 'r', label='R2')
-    # plt.plot(time_seconds, Ctrl2_raw, 'b', label='R2')
-    # plt.xlabel('Time (seconds)')
-    # plt.ylabel('CMOS Signal')
-    # plt.title('Raw signals:ROI12')
-    # plt.tight_layout()
-    # plt.legend()
-    # plt.savefig(resultsfolder+os.sep+'preprocessing_rawsignals_ROIs.pdf')
+    
 
     #%% Median filtering to remove electrical artifact.
     kernelSize=1
@@ -174,22 +149,6 @@ def preprocessing(i_session, datafolder='/data', resultsfolder='/results'):
     # plt.legend()
 
 
-    # plt.figure()
-    # plt.subplot(2,1,1)
-    # plt.plot(time_seconds, G1_denoised, 'g', label='G1 denoised')
-    # plt.plot(time_seconds, R1_denoised, 'r', label='R1 denoised')
-    # plt.plot(time_seconds, Ctrl1_denoised, 'b', label='iso1 denoised') 
-    # plt.title('Denoised signals:ROI1')
-    # plt.legend()
-
-    # plt.subplot(2,1,2)
-    # plt.plot(time_seconds, G2_denoised, 'g', label='G1 denoised')
-    # plt.plot(time_seconds, R2_denoised, 'r', label='R1 denoised')
-    # plt.plot(time_seconds, Ctrl2_denoised, 'b', label='iso1 denoised') 
-    # plt.title('Denoised signals:ROI2')
-    # plt.tight_layout()
-    # plt.legend()
-    # plt.savefig(resultsfolder+os.sep+'preprocessing_denoised_ROIs.pdf')
 
     #%% Photobleaching correction by LowCut
     '''
@@ -235,44 +194,6 @@ def preprocessing(i_session, datafolder='/data', resultsfolder='/results'):
     Ctrl1_expfit = biexpF(time_seconds, *Ctrl1_parms)
     Ctrl2_parms, parm_cov = curve_fit(biexpF, time_seconds, Ctrl2_denoised, p0=BiExpFitIni,maxfev=5000)
     Ctrl2_expfit = biexpF(time_seconds, *Ctrl2_parms)
-    plt.figure()
-    plt.subplot(1,2,1)
-    plt.plot(time_seconds, G1_denoised, 'g', label='G1_denoised')
-    plt.plot(time_seconds, R1_denoised, 'r', label='R1_denoised')
-    plt.plot(time_seconds, Ctrl1_denoised, 'b', label='iso1_denoised')
-    plt.plot(time_seconds, G1_expfit,'k', linewidth=1.5) 
-    plt.plot(time_seconds, R1_expfit,'k', linewidth=1.5) 
-    plt.plot(time_seconds, Ctrl1_expfit,'k', linewidth=1.5) 
-    plt.title('Bi-exponential fit to bleaching.')
-    plt.xlabel('Time (seconds)');
-    plt.subplot(1,2,2)
-    plt.plot(time_seconds, G2_denoised, 'g', label='G2_denoised')
-    plt.plot(time_seconds, R2_denoised, 'r', label='R2_denoised')
-    plt.plot(time_seconds, Ctrl2_denoised, 'b', label='iso2_denoised')
-    plt.plot(time_seconds, G2_expfit,'k', linewidth=1.5) 
-    plt.plot(time_seconds, R2_expfit,'k', linewidth=1.5) 
-    plt.plot(time_seconds, Ctrl2_expfit,'k', linewidth=1.5) 
-    plt.title('Bi-exponential fit to bleaching.')
-    plt.xlabel('Time (seconds)');
-    G1_es = G1_denoised - G1_expfit
-    G2_es = G2_denoised - G2_expfit
-    R1_es = R1_denoised - R1_expfit
-    R2_es = R2_denoised - R2_expfit
-    Ctrl1_es = Ctrl1_denoised - Ctrl1_expfit
-    Ctrl2_es = Ctrl2_denoised - Ctrl2_expfit
-    plt.figure()
-    plt.subplot(1,2,1)
-    plt.plot(time_seconds, G1_es, 'g', label='G1')
-    plt.plot(time_seconds, R1_es, 'r', label='R1')
-    plt.plot(time_seconds, Ctrl1_es, 'b', label='iso1')
-    plt.title('Bleaching correction by subtraction of biexponential fit')
-    plt.xlabel('Time (seconds)');
-    plt.subplot(1,2,2)
-    plt.plot(time_seconds, G2_es, 'g', label='G2')
-    plt.plot(time_seconds, R2_es, 'r', label='R2')
-    plt.plot(time_seconds, Ctrl2_es, 'b', label='iso2')
-    plt.title('Bleaching correction by subtraction of biexponential fit')
-    plt.xlabel('Time (seconds)');
     '''
     #%%
     # Fit 4th order polynomial to signals.
@@ -291,28 +212,6 @@ def preprocessing(i_session, datafolder='/data', resultsfolder='/results'):
     coefs_Ctrl2 = np.polyfit(time_seconds, Ctrl2_denoised, deg=4)
     Ctrl2_polyfit = np.polyval(coefs_Ctrl2, time_seconds)
 
-    # Plot fits
-    # plt.figure()
-    # plt.subplot(2,1,1)
-    # plt.plot(time_seconds, G1_denoised, 'g', label='G1_denoised')
-    # plt.plot(time_seconds, R1_denoised, 'r', label='R1_denoised')
-    # plt.plot(time_seconds, Ctrl1_denoised, 'b', label='iso1_denoised')
-    # plt.plot(time_seconds, G1_polyfit,'k', linewidth=1.5) 
-    # plt.plot(time_seconds, R1_polyfit,'k', linewidth=1.5) 
-    # plt.plot(time_seconds, Ctrl1_polyfit,'k', linewidth=1.5) 
-    # plt.title('polyfi ROI1')
-    # plt.xlabel('Time (seconds)');
-
-    # plt.subplot(2,1,2)
-    # plt.plot(time_seconds, G2_denoised, 'g', label='G2_denoised')
-    # plt.plot(time_seconds, R2_denoised, 'r', label='R2_denoised')
-    # plt.plot(time_seconds, Ctrl2_denoised, 'b', label='iso2_denoised')
-    # plt.plot(time_seconds, G2_polyfit,'k', linewidth=1.5) 
-    # plt.plot(time_seconds, R2_polyfit,'k', linewidth=1.5) 
-    # plt.plot(time_seconds, Ctrl2_polyfit,'k', linewidth=1.5) 
-    # plt.title('polyfit ROI2')
-    # plt.xlabel('Time (seconds)');
-    # plt.savefig(resultsfolder+os.sep+'preprocessing_polyfit_ROIs.pdf')
 
     G1_es = G1_denoised - G1_polyfit
     G2_es = G2_denoised - G2_polyfit
@@ -320,22 +219,6 @@ def preprocessing(i_session, datafolder='/data', resultsfolder='/results'):
     R2_es = R2_denoised - R2_polyfit
     Ctrl1_es = Ctrl1_denoised - Ctrl1_polyfit
     Ctrl2_es = Ctrl2_denoised - Ctrl2_polyfit
-
-    # plt.figure()
-    # plt.subplot(2,1,1)
-    # plt.plot(time_seconds, Ctrl1_es, 'b', label='iso1_estim')
-    # plt.plot(time_seconds, G1_es, 'g', label='G1_estim')
-    # plt.plot(time_seconds, R1_es, 'r', label='R1_estim')
-
-    # plt.subplot(2,1,2)
-    # plt.plot(time_seconds, Ctrl2_es, 'b', label='iso2_estim')
-    # plt.plot(time_seconds, G2_es, 'g', label='G2_estim')
-    # plt.plot(time_seconds, R2_es, 'r', label='R2_estim')
-
-    # plt.title('polyfit ROI2')
-    # plt.xlabel('Time (seconds)');
-    # plt.savefig(resultsfolder+os.sep+'preprocessing_polyfitestim_ROIs.pdf')
-
 
     #%%Additional LowCut
     '''
@@ -367,51 +250,7 @@ def preprocessing(i_session, datafolder='/data', resultsfolder='/results'):
     slopeR1, interceptR1, r_valueR1, p_valueR1, std_errR1 = linregress(x=Ctrl1_es, y=R1_es)
     slopeR2, interceptR2, r_valueR2, p_valueR2, std_errR2 = linregress(x=Ctrl2_es, y=R2_es)
 
-    # plt.figure()
-    # plt.subplot(2,2,1)
-    # plt.scatter(Ctrl1_es[::5], G1_es[::5],alpha=0.1, marker='.')
-    # x = np.array(plt.xlim())
-    # plt.plot(x, interceptG1+slopeG1*x)
-    # plt.xlabel('iso1')
-    # plt.ylabel('G1')
-    # plt.title('iso - G correlation.')
-
-    # plt.subplot(2,2,2)
-    # plt.scatter(Ctrl1_es[::5], G1_es[::5],alpha=0.1, marker='.')
-    # x = np.array(plt.xlim())
-    # plt.plot(x, interceptG1+slopeG1*x)
-    # plt.xlabel('iso2')
-    # plt.ylabel('G2')
-    # plt.title('iso - G correlation.')
-
-    # plt.subplot(2,2,3)
-    # plt.scatter(Ctrl1_es[::5], R1_es[::5],alpha=0.1, marker='.')
-    # x = np.array(plt.xlim())
-    # plt.plot(x, interceptR1+slopeR1*x)
-    # plt.xlabel('iso1')
-    # plt.ylabel('R1')
-    # plt.title('iso - R correlation.')
-
-    # plt.subplot(2,2,4)
-    # plt.scatter(Ctrl2_es[::5], R2_es[::5],alpha=0.1, marker='.')
-    # x = np.array(plt.xlim())
-    # plt.plot(x, interceptR2+slopeR2*x)
-    # plt.xlabel('iso2')
-    # plt.ylabel('R2')
-    # plt.title('iso - R correlation.')
-    # plt.tight_layout()
-    # plt.savefig(resultsfolder+os.sep+'preprocessing_isocorrelations.pdf')
-
-
-    # print('SlopeG1    : {:.3f}'.format(slopeG1))
-    # print('R-squaredG1: {:.3f}'.format(r_valueG1**2))
-    # print('SlopeG2    : {:.3f}'.format(slopeG2))
-    # print('R-squaredG2: {:.3f}'.format(r_valueG2**2))
-
-    # print('SlopeR1    : {:.3f}'.format(slopeR1))
-    # print('R-squaredR1: {:.3f}'.format(r_valueR1**2))
-    # print('SlopeR2    : {:.3f}'.format(slopeR2))
-    # print('R-squaredR2: {:.3f}'.format(r_valueR2**2))
+    
 
     #% motion corrected
     G1_est_motion = interceptG1 + slopeG1 * Ctrl1_es
@@ -424,41 +263,7 @@ def preprocessing(i_session, datafolder='/data', resultsfolder='/results'):
     R2_est_motion = interceptR2 + slopeR2 * Ctrl2_es
     R2_corrected = R2_es - R2_est_motion
 
-    # plt.figure()
-    # plt.subplot(2,2,1)
-    # plt.plot(time_seconds, G1_es , label='G1 - pre motion correction')
-    # plt.plot(time_seconds, G1_corrected, 'g', label='G1 - motion corrected')
-    # plt.plot(time_seconds, G1_est_motion - 0.001, 'y', label='estimated motion')
-    # plt.xlabel('Time (seconds)')
-    # plt.title('Motion correction G1')
-    # plt.legend()
 
-    # plt.subplot(2,2,2)
-    # plt.plot(time_seconds, G2_es , label='G2 - pre motion correction')
-    # plt.plot(time_seconds, G2_corrected, 'g', label='G2 - motion corrected')
-    # plt.plot(time_seconds, G2_est_motion - 0.001, 'y', label='estimated motion')
-    # plt.xlabel('Time (seconds)')
-    # plt.title('Motion correction G2')
-    # plt.legend()
-
-    # plt.subplot(2,2,3)
-    # plt.plot(time_seconds, R1_es , label='R1 - pre motion correction')
-    # plt.plot(time_seconds, R1_corrected, 'r', label='R1 - motion corrected')
-    # plt.plot(time_seconds, R1_est_motion - 0.001, 'y', label='estimated motion')
-    # plt.xlabel('Time (seconds)')
-    # plt.title('Motion correction R1')
-    # plt.legend()
-
-    # plt.subplot(2,2,4)
-    # plt.plot(time_seconds, R2_es , label='R2 - pre motion correction')
-    # plt.plot(time_seconds, R2_corrected, 'r', label='R2 - motion corrected')
-    # plt.plot(time_seconds, R2_est_motion - 0.001, 'y', label='estimated motion')
-    # plt.xlabel('Time (seconds)')
-    # plt.title('Motion correction R2')
-    # plt.legend()
-
-    # plt.tight_layout()
-    # plt.savefig(resultsfolder+os.sep+'preprocessing_isocorrelations_motioncorrected.pdf')
 
     #%% dF/F using sliding baseline
     b,a = butter(2, 0.0001, btype='low', fs=sampling_rate)
@@ -517,59 +322,8 @@ def preprocessing(i_session, datafolder='/data', resultsfolder='/results'):
     #%%
     time_seconds = np.arange(len(G1_dF_F)) /sampling_rate 
 
-    # plt.figure()
-    # plt.subplot(3,2,1)
-    # plt.plot(time_seconds, G1_dF_F*100, 'g')
-    # plt.plot(time_seconds, np.zeros(len(time_seconds)),'--k')
-    # plt.xlabel('Time (seconds)')
-    # plt.ylabel('G dF/F (%)')
-    # plt.title('G1 dF/F')
-    # plt.grid(True)
-
-    # plt.subplot(3,2,2)
-    # plt.plot(time_seconds, G2_dF_F*100, 'g')
-    # plt.plot(time_seconds, np.zeros(len(time_seconds)),'--k')
-    # plt.xlabel('Time (seconds)')
-    # plt.ylabel('G dF/F (%)')
-    # plt.title('G2 dF/F')
-    # plt.grid(True)
-
-    # plt.subplot(3,2,3)
-    # plt.plot(time_seconds, R1_dF_F*100, 'r')
-    # plt.plot(time_seconds, np.zeros(len(time_seconds)),'--k')
-    # plt.xlabel('Time (seconds)')
-    # plt.ylabel('R dF/F (%)')
-    # plt.title('R1 dF/F')
-    # plt.grid(True)
-
-    # plt.subplot(3,2,4)
-    # plt.plot(time_seconds, R2_dF_F*100, 'r')
-    # plt.plot(time_seconds, np.zeros(len(time_seconds)),'--k')
-    # plt.xlabel('Time (seconds)')
-    # plt.ylabel('R dF/F (%)')
-    # plt.title('R2 dF/F')
-    # plt.grid(True)
-
-    # plt.subplot(3,2,5)
-    # plt.plot(time_seconds, Ctrl1_dF_F*100, 'b')
-    # plt.plot(time_seconds, np.zeros(len(time_seconds)),'--k')
-    # plt.xlabel('Time (seconds)')
-    # plt.ylabel('Ctrl dF/F (%)')
-    # plt.title('Ctrl1 dF/F')
-    # plt.grid(True)
-
-    # plt.subplot(3,2,6)
-    # plt.plot(time_seconds, Ctrl2_dF_F*100, 'b')
-    # plt.plot(time_seconds, np.zeros(len(time_seconds)),'--k')
-    # plt.xlabel('Time (seconds)')
-    # plt.ylabel('Ctrl dF/F (%)')
-    # plt.title('Ctrl2 dF/F')
-    # plt.grid(True)
-    # plt.tight_layout()
-    # plt.savefig(resultsfolder+os.sep+'preprocessing_ctrl_dfF.pdf')
-
-
     #%% Save
+    print("line 324")
     np.save(resultsfolder +os.sep+ "G1_dF_F", G1_dF_F)
     np.save(resultsfolder +os.sep+  "G2_dF_F", G2_dF_F)
     np.save(resultsfolder +os.sep+  "R1_dF_F", R1_dF_F)
@@ -577,70 +331,10 @@ def preprocessing(i_session, datafolder='/data', resultsfolder='/results'):
     np.save(resultsfolder +os.sep+  "Ctrl1_dF_F", Ctrl1_dF_F)
     np.save(resultsfolder +os.sep+  "Ctrl2_dF_F", Ctrl2_dF_F)
     np.save(resultsfolder +os.sep+  "PMts", PMts)
+    print("line 332")
 
+    return time_seconds
 
-
-    #%%
-    # plt.figure()
-    # plt.plot(time_seconds, R1_dF_F*100, 'magenta')
-    # plt.plot(time_seconds, G1_dF_F*100, 'g')
-    # plt.xlabel('Time (seconds)')
-    # plt.ylabel('dF/F (%)')
-    # plt.title('L:')
-
-    # plt.figure()
-    # plt.plot(time_seconds, R2_dF_F*100, 'magenta')
-    # plt.plot(time_seconds, G2_dF_F*100, 'g')
-    # plt.xlabel('Time (seconds)')
-    # plt.ylabel('dF/F (%)')
-    # plt.title('R:')
-    # plt.savefig(resultsfolder+os.sep+'preprocessing_dfF.pdf')
-
-
-    #%%
-    # kernelSize=51
-
-    # plt.figure()
-    # plt.subplot(5,1,1)
-    # G1norm = G1_dF_F / np.max(G1_dF_F)
-    # G1norm = medfilt(G1norm, kernel_size=kernelSize)
-    # G2norm = G2_dF_F / np.max(G2_dF_F)
-    # G2norm = medfilt(G2norm, kernel_size=kernelSize)
-    # R1norm = R1_dF_F / np.max(R1_dF_F)
-    # R1norm = medfilt(R1norm, kernel_size=kernelSize)
-    # R2norm = R2_dF_F / np.max(R2_dF_F)
-    # R2norm = medfilt(R2norm, kernel_size=kernelSize)
-
-    # plt.subplot(5,1,1)
-    # plt.plot(time_seconds, G1norm / np.max(G1norm), 'green')
-    # plt.plot(time_seconds, R1norm / np.max(R1norm), 'magenta')
-
-    # plt.plot(time_seconds, G2norm / np.max(G2norm), 'blue')
-    # plt.plot(time_seconds, R2norm / np.max(R2norm), 'red')
-
-    # plt.subplot(5,1,2)
-    # plt.plot(time_seconds, G1norm / np.max(G1norm), 'green')
-    # plt.subplot(5,1,3)
-    # plt.plot(time_seconds, R1norm / np.max(R1norm), 'magenta')
-    # plt.subplot(5,1,4)
-    # plt.plot(time_seconds, G2norm / np.max(G2norm), 'blue')
-    # plt.subplot(5,1,5)
-    # plt.plot(time_seconds, R2norm / np.max(R2norm), 'red')
-    # plt.savefig(resultsfolder+os.sep+'preprocessing_dfFnorm.pdf')
-
-    #%%
-    # plt.figure()
-    # plt.subplot(2,1,1)
-    # plt.plot(time_seconds, R1_dF_F*100, 'blue')
-    # plt.plot(time_seconds, R2_dF_F*100, 'red')
-
-    # plt.subplot(2,1,2)
-    # plt.plot(time_seconds, G1_dF_F*100, 'blue')
-    # plt.plot(time_seconds, G2_dF_F*100, 'red')
-
-    # np.corrcoef(G1_dF_F, G2_dF_F)
-    # np.corrcoef(R1_dF_F, R2_dF_F)
-    # plt.savefig(resultsfolder+os.sep+'preprocessing_dfFnormscaled.pdf')
 
 
 def load_session(i_session, datafolder='/data', resultsfolder='/results', traces_names=['G1', 'R1', 'G2', 'R2']):
