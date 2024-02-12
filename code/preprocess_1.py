@@ -2,7 +2,6 @@
     Outputs preprocessed traces for the FIP data.
 """
 
-
 #%% clear all
 from IPython import get_ipython
 #get_ipython().magic("reset -sf")
