@@ -30,7 +30,7 @@ def tc_polyfit(tc, sampling_rate, degree):
     time_seconds = np.arange(len(tc)) /sampling_rate 
     coefs = np.polyfit(time_seconds, tc, deg=degree)
     tc_poly = np.polyval(coefs, time_seconds)
-    return tc_poly, tc_polycoefs
+    return tc_poly, coefs
 
 # setting up sliding baseline to calculate dF/F
 def tc_slidingbase(tc, sampling_rate):
@@ -52,7 +52,7 @@ def tc_filling(tc, nFrame2cut):
     return tc_filled
     
     
-#Preprocessing total function
+# Preprocessing total function
 def tc_preprocess(tc, nFrame2cut, kernelSize, sampling_rate, degree, b_percentile):
     tc_cropped = tc_crop(tc, nFrame2cut)
     tc_filtered = medfilt(tc_cropped, kernel_size=kernelSize)
@@ -65,6 +65,6 @@ def tc_preprocess(tc, nFrame2cut, kernelSize, sampling_rate, degree, b_percentil
     tc_dFoF = tc_filling(tc_dFoF, nFrame2cut)
     tc_params = tc_polycoefs
     tc_qualitymetrics = {'NaN':np.nan}
-    tc_params.update(tc_qualitymetrics)
+    tc_params = np.append(tc_params,tc_qualitymetrics)
     return tc_dFoF, tc_params
 
