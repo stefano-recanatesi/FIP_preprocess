@@ -32,6 +32,10 @@ def tc_polyfit(tc, sampling_rate, degree):
     tc_poly = np.polyval(coefs, time_seconds)
     return tc_poly, coefs
 
+def tc_expfit(tc):
+
+    return tc_exp, coefs
+
 # setting up sliding baseline to calculate dF/F
 def tc_slidingbase(tc, sampling_rate):
     b,a = butter(2, 0.0001, btype='low', fs=sampling_rate)

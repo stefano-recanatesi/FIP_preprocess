@@ -21,6 +21,7 @@ from pathlib import Path
 import Preprocessing_library as pp
 import data_acquisition_library as dl
 
+#%
 # -----------------------------------------------------------------------------------
 # LOAD, PREPROCESS AND SAVE THE NEURAL DATA
 def main():    
@@ -40,8 +41,8 @@ def main():
     print("AnalDir:", AnalDir)
     # ----------------------------------------------
     print("Acquiring data now")
-
     # define variables
+
     nFibers = 2
     nColor = 3
     sampling_rate = 20 #individual channel (not total)
@@ -78,9 +79,15 @@ def main():
 
     neural_data_df.to_pickle(results_folder + os.sep + 'neural_data.pkl')
     params_df.to_pickle(results_folder + os.sep + 'neural_data_params.pkl')
+
+#%
 # --------------------------------------------------------------------
 # if this is the main script being run, then execute the following code
 if __name__ == "__main__":
     main()
 
-# %%
+#%% Dataframe repackaging snippet
+# df_fip = pd.DataFrame()
+# for col in neural_data_df.columns:
+#     df_col = pd.DataFrame({'timestamp':np.nan,'fip':neural_data_df[col],'channel':col[0],'area':col[1], 'preprocess':'None'})
+#     df_fip = pd.concat([df_fip, df_col], axis=0)

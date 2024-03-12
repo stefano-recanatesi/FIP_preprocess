@@ -17,7 +17,9 @@ import datetime
 pd.set_option('display.expand_frame_repr', False)
 np.set_printoptions(linewidth=1000)
 pd.set_option("display.max_columns", None)
-
+import boto3
+from aind_codeocean_api.codeocean import CodeOceanClient
+from botocore.exceptions import ClientError
 import importlib
 from utils import preprocessing, load_session, dict2dataframe, plot_rawexample
 
@@ -39,9 +41,47 @@ def timeout_handler(signum, frame):   # Custom signal handler
 
 # %matplotlib inline
 
+#%% Download datas
+datafolder =  '../scratch/'
+
+CO_TOKEN = 'cop_YTg1NWZkMGE1ZTc3NDAwZGJiNDU5NTViMDE0Y2UzNDZHZmlKTFFwVWlQb3psWG10NUx3ZE9jcXVDTkVXSHZWSjIyNzhkZTZj'
+CO_DOMAIN = "https://codeocean.allenneuraldynamics.org"
+
+co_client = CodeOceanClient(domain=CO_DOMAIN, token=CO_TOKEN)
+response = co_client.search_all_data_assets(query="name:FIP_632106*")
+data_assets_all = response.json()["results"]
+# Filter if data in asset name
+data_assets = [r for r in data_assets_all if "FIP_632106" in r["name"]]
+
+# Create s3 client
+s3_client = boto3.client('s3')
+s3_response = s3_client.list_buckets()
+s3_buckets = s3_response["Buckets"]
+
+for asset in data_assets:
+    # Get bucket id for datasets    
+    dataset_bucket_prefix = asset['sourceBucket']['bucket']
+    asset_bucket = [r["Name"] for r in s3_buckets if dataset_bucket_prefix in r["Name"]][0]
+
+    asset_name = asset["name"]
+    asset_id = asset["id"]
+    matching_string = ".csv"
+
+    response = s3_client.list_objects_v2(Bucket=asset_bucket, Prefix=asset_name)
+    for object in response['Contents']:
+        if (asset_name in object['Key']) and (matching_string in object['Key']):            
+            filename = os.path.join(datafolder, object['Key'])
+            pathname = os.path.dirname(filename)
+            if not os.path.exists(pathname):
+                os.makedirs(pathname)
+            print('Downloading ' + filename)
+            s3_client.download_file(asset_bucket, object['Key'], filename)
+
+s3_client.close()
+
+
 #%% Load dataset files
 # os.chdir(os.path.dirname('/home/reca/Dropbox (uwamath)/Bandit_Allen/'))
-datafolder = '/data/'
 folders_sessions = sorted(glob.glob(datafolder+'*FIP_*'))
 
 #df_sessions = pd.read_pickle('/data/s3_foraging_all_nwb/df_sessions.pkl')      
@@ -222,3 +262,5 @@ for i_session in np.arange(1,2)[:]:
 # #df_sessions_new.to_pickle('/results/df_sessions.pk')
 
 # #%%
+
+#%% Download data
