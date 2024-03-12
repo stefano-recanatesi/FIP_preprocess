@@ -3,6 +3,7 @@ import os
 import boto3
 import aind_codeocean_api
 import boto3
+import numpy as np
 from aind_codeocean_api.codeocean import CodeOceanClient
 from botocore.exceptions import ClientError
 
@@ -19,7 +20,7 @@ def search_assets(query_asset='FIP_*'):
     return data_assets
 
 
-def download_assets(query_asset='FIP_*', query_asset_files='.csv',download_folder='../scratch/'):
+def download_assets(query_asset='FIP_*', query_asset_files='.csv',download_folder='../scratch/', max_assets_to_download=3):
     co_client = CodeOceanClient(domain=CO_DOMAIN, token=CO_TOKEN)
     response = co_client.search_all_data_assets(query="name:"+query_asset)
     data_assets_all = response.json()["results"]
@@ -31,7 +32,7 @@ def download_assets(query_asset='FIP_*', query_asset_files='.csv',download_folde
     s3_response = s3_client.list_buckets()
     s3_buckets = s3_response["Buckets"]
 
-    for asset in data_assets:
+    for asset in data_assets[:max_assets_to_download]:
         # Get bucket id for datasets    
         dataset_bucket_prefix = asset['sourceBucket']['bucket']
         asset_bucket = [r["Name"] for r in s3_buckets if dataset_bucket_prefix in r["Name"]][0]
@@ -64,5 +65,5 @@ def delete_downloaded_assets(query_asset='FIP_', query_asset_files='*.csv',downl
                 os.remove(filename)
 
 def get_data_ids(data_asset):
-    a = data_asset['name'].strip('FIP_').split('_')
-    return a
+    data_ids = data_asset['name'].strip('FIP_').split('_')
+    return data_ids
