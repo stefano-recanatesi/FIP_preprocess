@@ -32,10 +32,6 @@ def tc_polyfit(tc, sampling_rate, degree):
     tc_poly = np.polyval(coefs, time_seconds)
     return tc_poly, coefs
 
-def tc_expfit(tc):
-
-    return tc_exp, coefs
-
 # setting up sliding baseline to calculate dF/F
 def tc_slidingbase(tc, sampling_rate):
     b,a = butter(2, 0.0001, btype='low', fs=sampling_rate)
@@ -55,20 +51,43 @@ def tc_filling(tc, nFrame2cut):
     tc_filled = np.append(np.ones([nFrame2cut,1])*tc[0], tc)
     return tc_filled
     
-    
+# bi-exponential fit
+def func(x, a, b, c, d):
+    return a * np.exp(-b * x) + c * np.exp(-d * x)
+ 
+def tc_expfit(tc, sampling_rate=20):
+    time_seconds = np.arange(len(tc))/sampling_rate
+    popt, pcov = curve_fit(func,time_seconds,tc)
+    tc_exp = func(time_seconds, popt[0], popt[1], popt[2], popt[3])
+    return tc_exp, popt
+
 # Preprocessing total function
-def tc_preprocess(tc, nFrame2cut, kernelSize, sampling_rate, degree, b_percentile):
+def tc_preprocess(tc, method = 'poly', nFrame2cut=100, kernelSize=1, sampling_rate=20, degree=4, b_percentile=0.7):
+    # Standard parameters values
+        # nFibers = 2
+        # nColor = 3
+        # sampling_rate = 20 #individual channel (not total)
+        # nFrame2cut = 100  #crop initial n frames
+        # b_percentile = 0.70 #To calculare F0, median of bottom x%
+        # BiExpFitIni = [1,1e-3,1,1e-3,1]  #currently not used (instead fitted with 4th-polynomial)
+        # kernelSize = 1 #median filter
+        # degree = 4 #polyfit
     tc_cropped = tc_crop(tc, nFrame2cut)
     tc_filtered = medfilt(tc_cropped, kernel_size=kernelSize)
     tc_filtered = tc_lowcut(tc_filtered, sampling_rate)
-    tc_poly, tc_polycoefs = tc_polyfit(tc_filtered, sampling_rate, degree)
-    tc_estim = tc_filtered - tc_poly # 
+    
+    if method == 'poly':
+        tc_fit, tc_coefs = tc_polyfit(tc_filtered, sampling_rate, degree)
+    if method == 'exp':
+        tc_fit, tc_coefs = tc_expfit(tc_filtered, sampling_rate)        
+
+    tc_estim = tc_filtered - tc_fit # 
     tc_base = tc_slidingbase(tc_filtered, sampling_rate)
     #tc_dFoF = tc_dFF(tc_filtered, tc_base, b_percentile)
     tc_dFoF = tc_dFF(tc_estim, tc_base, b_percentile)    
-    tc_dFoF = tc_filling(tc_dFoF, nFrame2cut)
-    tc_params = tc_polycoefs
-    tc_qualitymetrics = {'NaN':np.nan}
-    tc_params = np.append(tc_params,tc_qualitymetrics)
+    tc_dFoF = tc_filling(tc_dFoF, nFrame2cut)    
+    tc_params = {i_coef:tc_coefs[i_coef] for i_coef in range(len(tc_coefs))}
+    tc_qualitymetrics = {'QC_metric':np.nan}    
+    tc_params.update(tc_qualitymetrics)
     return tc_dFoF, tc_params
 

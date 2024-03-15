@@ -1,5 +1,8 @@
 metadata_version: 1
-name: FIP_preprocess
-description: Basic structure of a capsule to be customized as needed.
+name: FIP_preprocess_updated
+description: This capsule loads and preprocess FIP data then produces a dataframe
+  with signals from the different channels along with their timestamps.
 authors:
 - name: AIND
+- name: Stefano
+- name: Brian

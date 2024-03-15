@@ -1,7 +1,10 @@
-# hash:sha256:9ef327db82109f7c7adf6cd5151c98e74566fc6288c5525fe37f33e206ad562f
-FROM registry.codeocean.allenneuraldynamics.org/codeocean/cuda-miniconda-jupyterlab:latest
+# hash:sha256:f6447baeb47d78beacf6fbf4c9bf3d7b3317813b2a1a87385a3ea6ef38d948bc
+ARG REGISTRY_HOST
+FROM $REGISTRY_HOST/codeocean/cuda-miniconda-jupyterlab:latest
 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG API_KEY
+ARG API_SECRET
 ARG AWS_ACCESS_KEY_ID
 ARG AWS_DEFAULT_REGION
 ARG AWS_SECRET_ACCESS_KEY
