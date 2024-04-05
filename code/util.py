@@ -92,18 +92,35 @@ def get_data_ids(data_asset):
     return data_ids
 
 #%%
+
+# function to clean the timestamps
 def clean_timestamps(timestamps, pace=0.05, tolerance=0.2):
+    
+    # remove timestamps that are too close to each other
     threshold_remove = pace - pace * tolerance
-    threshold_fillin = pace + pace * tolerance
     idxs_to_remove = np.diff(timestamps, prepend=-np.Inf)<threshold_remove
     timestamps_cleaned = timestamps[~idxs_to_remove]
+
+    # timestamps that are too far apart
+    threshold_fillin = pace + pace * tolerance
     timestamps_final = timestamps_cleaned
+
+    # loops over all identified gaps
     while any(np.diff(timestamps_final)>threshold_fillin):
+        # the first index in the diff array
         idx_to_fillin = np.where(np.diff(timestamps_final)>threshold_fillin)[0][0]
-        gap_to_fillin = np.round(np.diff(timestamps_final)[idx_to_fillin],2)    
+
+        # round the values in the diff array to 2 dp
+        gap_to_fillin = np.round(np.diff(timestamps_final)[idx_to_fillin],2)
+
+        # gets values of timestamps to add to the gap -- proportional to the size of the gap
         values_to_fillin = timestamps_final[idx_to_fillin]+np.arange(pace,gap_to_fillin,pace)
+
+        # then inserts these values to the final timestamps array
         timestamps_final = np.insert(timestamps_final, idx_to_fillin+1, values_to_fillin)
+
     return timestamps_final
+ 
 
 def load_NPM_fip_data(filenames, channels_per_file=2):
     df_fip = pd.DataFrame()
@@ -181,10 +198,19 @@ def data_to_dataframe(AnalDir, channels_per_file=2):
             filenames.extend(glob.glob(AnalDir + os.sep + "**" + os.sep + name +'*', recursive=True)) 
             system = 'Homebrew'
     
-    if system == 'NPM':
-        df_fip, df_data_acquisition = load_NPM_fip_data(filenames, channels_per_file)
-    if system == 'Homebrew':
-        df_fip, df_data_acquisition = load_Homebrew_fip_data(filenames, channels_per_file)
+    # NEW: statement to catch the sessions with no data: output empty df
+    if 'system' in locals():
+
+        if system == 'NPM':
+            df_fip, df_data_acquisition = load_NPM_fip_data(filenames, channels_per_file)
+        if system == 'Homebrew':
+            df_fip, df_data_acquisition = load_Homebrew_fip_data(filenames, channels_per_file)
+
+    else:
+        print('No data found')
+        df_fip = pd.DataFrame()
+        df_data_acquisition = pd.DataFrame()
+
     return df_fip, df_data_acquisition
 
 
